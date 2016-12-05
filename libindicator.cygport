@@ -1,0 +1,61 @@
+inherit gnome2
+
+NAME="libindicator"
+VERSION=12.10.1
+RELEASE=1
+CATEGORY="Libs"
+SUMMARY="Ayatana indicators core library"
+DESCRIPTION="A set of symbols and convenience functions that all Ayatana
+indicators are likely to use."
+HOMEPAGE="https://launchpad.net/libindicator"
+SRC_URI="${HOMEPAGE}/${VERSION%.*}/${VERSION}/+download/libindicator-${VERSION}.tar.gz"
+PATCH_URI="12.10.1-tests.patch"
+
+PKG_NAMES="${NAME}7 ${NAME}-common ${NAME}-devel ${NAME}-tools ${NAME}3_7 ${NAME}3-devel ${NAME}3-tools"
+libindicator7_SUMMARY="${SUMMARY} for GTK+ 2"
+libindicator7_REQUIRES="${NAME}-common"
+libindicator7_CONTENTS="usr/bin/cygindicator-7.dll"
+libindicator_common_CONTENTS="
+	usr/share/doc/libindicator/
+	usr/share/libindicator/
+"
+libindicator_devel_SUMMARY=${libindicator7_SUMMARY}
+libindicator_devel_CONTENTS="
+	usr/include/libindicator-0.4/
+	usr/lib/libindicator.dll.a
+	usr/lib/pkgconfig/indicator-0.4.pc
+"
+libindicator3_7_SUMMARY="${SUMMARY} for GTK+ 3"
+libindicator3_7_REQUIRES="${NAME}-common"
+libindicator3_7_CONTENTS="usr/bin/cygindicator3-7.dll"
+libindicator3_devel_SUMMARY=${libindicator3_7_SUMMARY}
+libindicator3_devel_CONTENTS="
+	usr/include/libindicator3-0.4/
+	usr/lib/libindicator3.dll.a
+	usr/lib/pkgconfig/indicator3-0.4.pc
+"
+libindicator_tools_CONTENTS="usr/libexec/indicator-loader.exe"
+libindicator3_tools_CONTENTS="usr/libexec/indicator-loader3.exe"
+
+# this hasn't been updated in far too long
+CFLAGS+=" -Wno-error=deprecated-declarations"
+
+src_compile() {
+	cd ${S}
+	gnome2_autoreconf
+
+	mkdir -p ${B}/gtk2
+	cd ${B}/gtk2
+	gnome2_compile --with-gtk=2
+
+	mkdir -p ${B}/gtk3
+	cd ${B}/gtk3
+	gnome2_compile --with-gtk=3
+}
+
+src_install() {
+	cd ${B}/gtk3
+	cyginstall
+	cd ${B}/gtk2
+	cyginstall
+}
